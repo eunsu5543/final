@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="project.repository">
+	<resultMap type="map" id="fclist">
+		<result property="free_cmnt_num" column="free_cmnt_num"/>
+		<result property="mem_nick" column="mem_nick"/>
+		<result property="free_cmnt_content" column="free_cmnt_content"/>
+		<result property="free_cmnt_regdate" column="free_cmnt_regdate"/>
+	</resultMap>
+	<select id="getFreeCmntList" parameterType="int" resultMap="fclist">
+		SELECT 
+		    free_cmnt_num, mem_nick, free_cmnt_content, free_cmnt_regdate  
+		FROM 
+		    (
+		    SELECT * FROM FREE_CMNT 
+		    LEFT JOIN MEMBER ON FREE_CMNT.mem_num = MEMBER.mem_num
+		    )
+		WHERE free_num = #{free_num}
+	</select>
+	<insert id="insertFreeCmnt" parameterType="map">
+		INSERT INTO FREE_CMNT (free_num, free_cmnt_content, mem_num, free_cmnt_num)
+		VALUES ( #{free_num}, #{free_cmnt_content}, #{mem_num}, seq_free_cmnt.nextval)
+	</insert>
+	<delete id="deleteFreeCmnt" parameterType="int">
+		DELETE FROM FREE_CMNT
+		WHERE free_cmnt_num = #{free_cmnt_num}
+	</delete>
+</mapper>

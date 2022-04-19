@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mybatis.mapper.MemberMapper">
+<select id="proc_login2022" parameterType="map" statementType="CALLABLE">
+	{call proc_login(#{mem_id, mode=IN, jdbcType=VARCHAR, javaType=java.lang.String}
+							,#{mem_pw, mode=IN, jdbcType=VARCHAR, javaType=java.lang.String}
+							,#{mem_num, mode=OUT, jdbcType=VARCHAR, javaType=java.lang.Integer}
+		)}
+ </select>
+ 
+ 	<select id="findId" parameterType="map" resultType="map">
+		SELECT NVL((SELECT mem_id
+		FROM member
+		WHERE mem_email= #{mem_email}
+		AND mem_name= #{mem_name}
+		AND mem_tel = #{mem_tel}),'찾으시는 아이디가 없습니다.') mem_id
+		FROM dual
+	</select>
+	
+ 	<select id="findPw" parameterType="map" resultType="map">
+	SELECT NVL((SELECT mem_id
+		FROM member
+		WHERE mem_id = #{mem_id}
+		AND mem_email= #{mem_email}
+		AND mem_name= #{mem_name}
+		AND mem_tel = #{mem_tel}),'찾으시는 아이디가 없습니다.') mem_id
+		FROM dual
+	</select>
+	
+ 	<update id="UpdatePw" parameterType="map" >
+    update member 
+    set mem_pw = #{mem_pw}
+    WHERE mem_id= #{mem_id}
+	</update>
+ 	
+ 	<!--개인회원 중복체크  -->
+ 	<select id="memberUserEmailSerch" parameterType="map" resultType="map">
+			SELECT NVL((SELECT mem_email
+		FROM member WHERE mem_email=#{mem_email}),'undefined') mem_email
+		FROM dual
+	</select>
+ 	<select id="memberUserIdSerch" parameterType="map" resultType="map">
+			SELECT NVL((SELECT mem_id
+		FROM member WHERE mem_id=#{mem_id}),'undefined') mem_id
+		FROM dual
+	</select>
+ 	<select id="memberUserNickSerch" parameterType="map" resultType="map">
+			SELECT NVL((SELECT mem_nick
+		FROM member WHERE mem_nick=#{mem_nick}),'undefined') mem_nick
+		FROM dual
+	</select>
+ 	<!--개인회원 중복체크  -->
+	
+ 	<insert id="memberUserInsert" parameterType="map">
+INSERT INTO MEMBER(MEM_NUM,MEM_CODE,MEM_ID,MEM_PW,MEM_NICK,MEM_NAME,MEM_EMAIL,MEM_TEL,MEM_JOIN)
+VALUES(SEQ_MEMBER.nextval,#{mem_code},#{mem_id},#{mem_pw},#{mem_nick},#{mem_name},
+#{mem_email},#{mem_tel},TO_CHAR(sysdate,'YYYY-MM-DD'))	
+	</insert> 
+	
+ 	<insert id="memberBizInsert" parameterType="map">
+  INSERT INTO MEMBER(MEM_NUM, MEM_CODE, MEM_NAME, MEM_ID, MEM_PW, MEM_BIZNUM, MEM_EMAIL, MEM_BIZNAME, MEM_TEL ,MEM_JOIN)
+        VALUES (SEQ_MEMBER.nextval, 2, #{mem_name}, #{mem_id}, #{mem_pw},#{mem_biznum}, #{mem_email},#{mem_bizname},#{mem_tel},TO_CHAR(sysdate,'YYYY-MM-DD'))
+	</insert> 
+	
+</mapper>

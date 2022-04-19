@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="project.repository">
+
+	<resultMap type="map" id="flist">
+		<result property="free_num" column="free_num"/>
+		<result property="mem_num" column="mem_num"/>
+		<result property="free_subject" column="free_subject"/>
+		<result property="free_title" column="free_title"/>
+		<result property="free_content" column="free_content"/>
+		<result property="free_views" column="free_views"/>
+		<result property="free_regdate" column="free_regdate"/>
+	</resultMap>
+	<select id="getFreeBoardList" parameterType="map" resultMap="flist">
+        SELECT 
+            free_num, mem_num, free_subject, free_title, 
+            dbms_lob.substr(free_content, 10000, 1) as free_content, 
+            free_views, free_regdate
+        FROM
+        (
+            SELECT 
+                /*+INDEX_DESC(FREE_BOARD PK_FREE_BOARD)*/
+                free_num, mem_num, free_subject, free_title, 
+                dbms_lob.substr(free_content, 10000, 1) as free_content, 
+                free_views, free_regdate
+            FROM FREE_BOARD
+        )
+	</select>
+	<resultMap type="map" id="fsearch">
+		<result property="free_num" column="free_num"/>
+		<result property="mem_nick" column="mem_nick"/>
+		<result property="free_subject" column="free_subject"/>
+		<result property="free_title" column="free_title"/>
+		<result property="free_content" column="free_content"/>
+		<result property="free_views" column="free_views"/>
+		<result property="free_regdate" column="free_regdate"/>	
+	</resultMap>
+	<select id="searchFreeBoard" parameterType="String" resultMap="fsearch">
+		SELECT
+            free_num, 
+            free_subject, 
+            free_title,
+            dbms_lob.substr(free_content, 10000, 1) as free_content,
+            free_regdate, 
+            free_views, 
+            mem_nick
+		FROM FREE_BOARD F JOIN MEMBER M
+		ON F.mem_num = M.mem_num
+		WHERE free_title LIKE '%'||#{keyword}||'%'
+		OR free_content LIKE '%'||#{keyword}||'%'
+	</select>
+	<update id="updateFreeBoardViews" parameterType="int">
+        UPDATE FREE_BOARD
+        SET free_views = free_views + 1
+        WHERE free_num = #{free_num}			
+	</update>
+	<insert id="insertFreeBoard" parameterType="map">
+        INSERT INTO FREE_BOARD
+        (
+            free_num, mem_num, free_subject, free_title, free_content
+        )
+        VALUES
+        (
+            seq_free_board.nextval, 
+            #{mem_num}, 
+            #{free_subject}, 
+            #{free_title}, 
+            to_clob(#{free_content})
+        )
+        WHERE mem_num = #{mem_num}
+	</insert>
+	<select id="getFreeNum" parameterType="int" resultType="int">
+		SELECT LAST_NUMBER free_num FROM USER_SEQUENCES WHERE SEQUENCE_NAME='SEQ_FREE_BOARD'
+	</select>
+	<update id="updateFreeBoard" parameterType="map">
+		UPDATE FREE_BOARD
+		SET
+            free_subject = #{free_subject},
+            free_title = #{free_title},
+            free_content = to_clob(#{free_content}),
+            free_regdate = to_char(SYSDATE, 'YYYYMMDD')
+		WHERE free_num = #{free_num}
+	</update>
+	<delete id="deleteFreeBoard" parameterType="int">
+        DELETE FROM FREE_BOARD
+        WHERE free_num = #{free_num}
+	</delete>
+
+</mapper>
